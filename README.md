@@ -1,12 +1,42 @@
 # Spring Boot SDD Starter
 
+[![Java](https://img.shields.io/badge/Java-21-orange.svg)](https://openjdk.org/projects/jdk/21/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1.0-brightgreen.svg)](https://spring.io/projects/spring-boot)
+[![Build tool](https://img.shields.io/badge/Build-Gradle-02303A.svg)](https://gradle.org/)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+
 A starter for building Spring Boot services using a **Spec-Driven Development (SDD)** workflow with Claude Code. It bundles a working Spring Boot 4 / Gradle project together with a `.claude/` toolchain — skills, agents, and hooks — that turns business rules into specs, specs into acceptance tests, and tests into code, with the test suite enforced automatically on every change.
 
-The project ships with a small example domain (a shipping cost calculator) so everything is runnable out of the box. See [Adapting This Starter](#adapting-this-starter) to make it your own.
+The project ships with a small example domain (a shipping cost calculator, secured with API key authentication) so everything is runnable out of the box. See [Adapting This Starter](#adapting-this-starter) to make it your own.
+
+## Table of Contents
+
+- [About This Course](#about-this-course)
+- [Features](#features)
+- [Requirements](#requirements)
+- [Build](#build)
+- [Test](#test)
+- [Run](#run)
+  - [Authentication](#authentication)
+  - [API Documentation (Swagger UI)](#api-documentation-swagger-ui)
+- [The SDD Workflow](#the-sdd-workflow)
+- [Project Layout](#project-layout)
+- [Adapting This Starter](#adapting-this-starter)
+- [Contributing](#contributing)
+- [License](#license)
 
 ## About This Course
 
 This starter is a resource from the Udemy course **[Spec-Driven Development in Java with TDD and Claude Code](https://www.udemy.com/course/spring-boot-ai-tdd/?referralCode=3170E302C61D48703A94)**. The course walks through building a fully fledged Spring Boot application from the ground up, using all the features of Claude Code — skills, agents, hooks, and the Spec-Driven Development workflow that this project is built around.
+
+## Features
+
+- **Spec-Driven Development toolchain** — `/discover`, `/accept`, and `/tdd` skills that take a feature from Example Mapping through a failing acceptance test to a passing implementation, one rule at a time.
+- **Architecture enforcement** — the `architecture-guardian` and `spec-compliance` agents check layer boundaries and spec-to-test traceability on demand.
+- **Automated regression gating** — hooks run the full test suite on every edit and again before a turn ends, so regressions surface immediately.
+- **Worked example domain** — a shipping cost calculator (weight tiers, distance zones, free-shipping thresholds) fully specified in `docs/specs/` and fully tested.
+- **API key authentication** — role-based (`USER` / `ADMIN`) security wired with Spring Security, with Swagger left open for docs.
+- **Interactive API docs** — springdoc-openapi generates Swagger UI directly from the controllers.
 
 ## Requirements
 
@@ -74,7 +104,7 @@ To change the port or other settings, edit `src/main/resources/application.prope
 
 Every endpoint requires a valid `X-API-Key` header — missing or unrecognized keys get `401 Unauthorized`. Two roles are supported, `USER` and `ADMIN` (an `ADMIN` key can do everything a `USER` key can, plus access admin-only endpoints); a valid key with the wrong role gets `403 Forbidden`. Test keys for both roles are configured in `src/main/resources/application.properties` (`app.security.api-keys.*`). Swagger/OpenAPI paths (`/swagger-ui.html`, `/swagger-ui/**`, `/v3/api-docs/**`) are exempt from authentication so the docs stay reachable without a key. See `docs/specs/api-security.specs.md` for the full rule set.
 
-### API documentation (Swagger UI)
+### API Documentation (Swagger UI)
 
 With the app running, interactive API docs are at **http://localhost:8080/swagger-ui.html**, generated automatically from the controllers by springdoc-openapi. The raw OpenAPI spec is at `/v3/api-docs`.
 
@@ -135,3 +165,16 @@ This repo is a template. The `.claude/` toolchain works for any Spring Boot / Gr
 8. **`docs/specs/`** — starts empty. Create one `<feature>.specs.md` per feature as you `/discover` them; every rule should end up with at least one acceptance test.
 
 Keep as-is: the `.claude/` directory structure, the hook exit-code convention (exit 2 to block), and the two-tier test layout — the skills and agents assume them.
+
+## Contributing
+
+This repo is primarily a course companion and starter template, but fixes and improvements are welcome:
+
+1. Fork the repo and create a branch off `main` for your change.
+2. Follow the SDD workflow above for any new business rule — a spec and an acceptance test should accompany new behaviour.
+3. Run `./gradlew test` locally and make sure the full suite is green before opening a pull request.
+4. Open a PR describing what changed and why.
+
+## License
+
+Licensed under the [Apache License 2.0](LICENSE).
