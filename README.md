@@ -64,10 +64,15 @@ Example request against the bundled shipping calculator:
 ```bash
 curl -X POST http://localhost:8080/api/shipping/calculate \
   -H 'Content-Type: application/json' \
+  -H 'X-API-Key: user-test-key' \
   -d '{ "weightKg": 3.2, "zone": "EUROPEAN", "orderTotal": 50.00 }'
 ```
 
 To change the port or other settings, edit `src/main/resources/application.properties` (e.g. `server.port=9090`) or pass it at runtime: `./gradlew bootRun --args='--server.port=9090'`.
+
+### Authentication
+
+Every endpoint requires a valid `X-API-Key` header — missing or unrecognized keys get `401 Unauthorized`. Two roles are supported, `USER` and `ADMIN` (an `ADMIN` key can do everything a `USER` key can, plus access admin-only endpoints); a valid key with the wrong role gets `403 Forbidden`. Test keys for both roles are configured in `src/main/resources/application.properties` (`app.security.api-keys.*`). Swagger/OpenAPI paths (`/swagger-ui.html`, `/swagger-ui/**`, `/v3/api-docs/**`) are exempt from authentication so the docs stay reachable without a key. See `docs/specs/api-security.specs.md` for the full rule set.
 
 ### API documentation (Swagger UI)
 
@@ -97,7 +102,7 @@ Three hooks (configured in `.claude/settings.json`) run automatically:
 ```
 build.gradle                     Dependencies, Java/Spring Boot versions
 settings.gradle                  Root project name
-src/main/java/...                Application code (controller / service / model)
+src/main/java/...                Application code (controller / service / model / config / security)
 src/main/resources/              application.properties
 src/test/java/.../acceptance/    Acceptance tests (@SpringBootTest + MockMvc)
 src/test/java/.../service/       Service/unit tests (plain JUnit 6)
@@ -115,7 +120,7 @@ This repo is a template. The `.claude/` toolchain works for any Spring Boot / Gr
 
 1. **`CLAUDE.md`** — the most important file; Claude reads it before doing anything. Each section is a working default with an `<!-- ADAPT -->` comment explaining what to change. Replace the Project Overview, Architecture, API Design, and (if present) Processing Order / Monetary sections with your domain, and delete the *Worked Example* block at the bottom once your sections are accurate.
 
-2. **`build.gradle`** — search for `ADAPT` comments. Set your `group`, the Java version, and the dependencies your project needs (e.g. `spring-boot-starter-data-jpa`, `spring-boot-starter-validation`). Spring Security is commented out until you need it — note that adding it returns 401 on every endpoint until you configure a `SecurityFilterChain`.
+2. **`build.gradle`** — search for `ADAPT` comments. Set your `group`, the Java version, and the dependencies your project needs (e.g. `spring-boot-starter-data-jpa`, `spring-boot-starter-validation`). Spring Security is already wired in this repo's worked example (API-key auth via `SecurityConfig`, see [Authentication](#authentication)) — if your project doesn't need auth, remove the `spring-boot-starter-security` dependency along with `config/`, `security/`, and the API key classes; if it does, swap the header-based scheme for your own.
 
 3. **Rename the project** — change `rootProject.name` in `settings.gradle`, the `group` in `build.gradle`, `spring.application.name` in `application.properties`, and move the code from the `com.example.shipping` package to your own. Rename the main `@SpringBootApplication` class to match.
 
