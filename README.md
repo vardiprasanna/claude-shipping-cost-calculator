@@ -9,26 +9,6 @@ A starter for building Spring Boot services using a **Spec-Driven Development (S
 
 The project ships with a small example domain (a shipping cost calculator, secured with API key authentication) so everything is runnable out of the box. See [Adapting This Starter](#adapting-this-starter) to make it your own.
 
-## Table of Contents
-
-- [About This Course](#about-this-course)
-- [Features](#features)
-- [Requirements](#requirements)
-- [Build](#build)
-- [Test](#test)
-- [Run](#run)
-  - [Authentication](#authentication)
-  - [API Documentation (Swagger UI)](#api-documentation-swagger-ui)
-- [The SDD Workflow](#the-sdd-workflow)
-- [Project Layout](#project-layout)
-- [Adapting This Starter](#adapting-this-starter)
-- [Contributing](#contributing)
-- [License](#license)
-
-## About This Course
-
-This starter is a resource from the Udemy course **[Spec-Driven Development in Java with TDD and Claude Code](https://www.udemy.com/course/spring-boot-ai-tdd/?referralCode=3170E302C61D48703A94)**. The course walks through building a fully fledged Spring Boot application from the ground up, using all the features of Claude Code — skills, agents, hooks, and the Spec-Driven Development workflow that this project is built around.
-
 ## Features
 
 - **Spec-Driven Development toolchain** — `/discover`, `/accept`, and `/tdd` skills that take a feature from Example Mapping through a failing acceptance test to a passing implementation, one rule at a time.
