@@ -37,6 +37,7 @@ class FreeShippingAcceptanceIT {
         })
         void domesticOrderAtOrAbove75GetsFreeShipping(String zone, String orderTotal, String expectedTotalCost) {
             MvcTestResult result = mvc.post().uri("/api/shipping/calculate")
+                    .header("X-API-Key", "user-test-key")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content("""
                             { "weightKg": 1.000, "zone": "%s", "orderTotal": %s }
@@ -61,6 +62,7 @@ class FreeShippingAcceptanceIT {
                 + "pre-waiver cost reduced to $0.00")
         void heavyParcelWithQualifyingOrderGetsFreeShipping() {
             MvcTestResult result = mvc.post().uri("/api/shipping/calculate")
+                    .header("X-API-Key", "user-test-key")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content("""
                             { "weightKg": 25.000, "zone": "DOMESTIC", "orderTotal": 100.00 }
@@ -79,6 +81,7 @@ class FreeShippingAcceptanceIT {
                 + "is charged the full $11.49, no waiver (counter-example)")
         void heavyParcelBelowThresholdIsChargedInFull() {
             MvcTestResult result = mvc.post().uri("/api/shipping/calculate")
+                    .header("X-API-Key", "user-test-key")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content("""
                             { "weightKg": 25.000, "zone": "DOMESTIC", "orderTotal": 50.00 }

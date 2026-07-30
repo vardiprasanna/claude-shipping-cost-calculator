@@ -36,6 +36,7 @@ class WeightTiersAcceptanceIT {
         })
         void appliesFlatBaseRateForWeightTier(String weightKg, String expectedBaseRate) {
             MvcTestResult result = mvc.post().uri("/api/shipping/calculate")
+                    .header("X-API-Key", "user-test-key")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content("""
                             { "weightKg": %s, "zone": "DOMESTIC", "orderTotal": 10.00 }
@@ -58,6 +59,7 @@ class WeightTiersAcceptanceIT {
         @DisplayName("The one where a parcel weighs 25kg => $8.99 + ($0.50 x 5kg) = $11.49")
         void surchargeAppliesToPortionOfWeightOverTwentyKg() {
             MvcTestResult result = mvc.post().uri("/api/shipping/calculate")
+                    .header("X-API-Key", "user-test-key")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content("""
                             { "weightKg": 25.000, "zone": "DOMESTIC", "orderTotal": 10.00 }
@@ -75,6 +77,7 @@ class WeightTiersAcceptanceIT {
         @DisplayName("The one where a parcel weighs exactly 20.000kg => no surcharge applies, total is $8.99 (counter-example)")
         void noSurchargeAtExactlyTwentyKilograms() {
             MvcTestResult result = mvc.post().uri("/api/shipping/calculate")
+                    .header("X-API-Key", "user-test-key")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content("""
                             { "weightKg": 20.000, "zone": "DOMESTIC", "orderTotal": 10.00 }
@@ -97,6 +100,7 @@ class WeightTiersAcceptanceIT {
         @DisplayName("The one where weight is -2kg => 400 Bad Request, no cost calculated")
         void negativeWeightIsRejectedWithBadRequest() {
             MvcTestResult result = mvc.post().uri("/api/shipping/calculate")
+                    .header("X-API-Key", "user-test-key")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content("""
                             { "weightKg": -2.000, "zone": "DOMESTIC", "orderTotal": 10.00 }
@@ -110,6 +114,7 @@ class WeightTiersAcceptanceIT {
         @DisplayName("The one where weight is 0.001kg (smallest valid positive weight) => accepted, priced at the under-1kg tier, $2.99 (counter-example)")
         void smallestValidPositiveWeightIsAccepted() {
             MvcTestResult result = mvc.post().uri("/api/shipping/calculate")
+                    .header("X-API-Key", "user-test-key")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content("""
                             { "weightKg": 0.001, "zone": "DOMESTIC", "orderTotal": 10.00 }
