@@ -21,6 +21,9 @@ public class ShippingController {
     public ShippingCost calculate(@RequestBody ShippingRequest request) {
         BigDecimal baseRate = shippingCostService.baseRateFor(request.weightKg());
         BigDecimal zonedRate = shippingCostService.zonedRateFor(baseRate, request.zone());
-        return new ShippingCost(zonedRate, new ShippingCost.Breakdown(baseRate, zonedRate));
+        BigDecimal totalCost = shippingCostService.totalCostFor(zonedRate, request.zone(), request.orderTotal());
+        boolean freeShippingApplied =
+                shippingCostService.qualifiesForFreeShipping(request.zone(), request.orderTotal());
+        return new ShippingCost(totalCost, new ShippingCost.Breakdown(baseRate, zonedRate, freeShippingApplied));
     }
 }

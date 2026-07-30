@@ -43,4 +43,28 @@ class ShippingCostServiceTest {
         assertThat(service.zonedRateFor(new BigDecimal(baseRate), zone))
                 .isEqualByComparingTo(expectedZonedRate);
     }
+
+    @ParameterizedTest(name = "The one where a {0} order totalling ${1} qualifies for free shipping: {2}")
+    @CsvSource({
+            "DOMESTIC,      74.99,  false",
+            "DOMESTIC,      75.00,  true",
+            "EUROPEAN,      100.00, false",
+            "INTERNATIONAL, 100.00, false",
+    })
+    void ordersQualifyForFreeShippingOnlyWhenDomesticAndAtOrAbove75(
+            DistanceZone zone, String orderTotal, boolean expectedQualifies) {
+        assertThat(service.qualifiesForFreeShipping(zone, new BigDecimal(orderTotal)))
+                .isEqualTo(expectedQualifies);
+    }
+
+    @ParameterizedTest(name = "The one where a ${0} zoned rate for a {1} order totalling ${2} has a ${3} totalCost")
+    @CsvSource({
+            "11.49, DOMESTIC, 100.00, 0.00",
+            "11.49, DOMESTIC, 50.00,  11.49",
+    })
+    void totalCostIsZeroedOnlyWhenFreeShippingApplies(
+            String zonedRate, DistanceZone zone, String orderTotal, String expectedTotalCost) {
+        assertThat(service.totalCostFor(new BigDecimal(zonedRate), zone, new BigDecimal(orderTotal)))
+                .isEqualByComparingTo(expectedTotalCost);
+    }
 }
