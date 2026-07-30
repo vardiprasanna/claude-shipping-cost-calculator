@@ -30,6 +30,7 @@ class DistanceZonesAcceptanceIT {
         @DisplayName("The one where a European parcel with an $8.99 base rate has a $13.49 zoned rate")
         void appliesZoneMultiplierToBaseRate() {
             MvcTestResult result = mvc.post().uri("/api/shipping/calculate")
+                    .header("X-API-Key", "user-test-key")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content("""
                             { "weightKg": 1.000, "zone": "EUROPEAN", "orderTotal": 10.00 }
@@ -52,6 +53,7 @@ class DistanceZonesAcceptanceIT {
         @DisplayName("The one where zone is \"MARS\" => 400 Bad Request, no cost calculated")
         void unrecognizedZoneIsRejectedWithBadRequest() {
             MvcTestResult result = mvc.post().uri("/api/shipping/calculate")
+                    .header("X-API-Key", "user-test-key")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content("""
                             { "weightKg": 1.000, "zone": "MARS", "orderTotal": 10.00 }
@@ -65,6 +67,7 @@ class DistanceZonesAcceptanceIT {
         @DisplayName("The one where zone is \"INTERNATIONAL\" (the least common but still valid zone) => accepted, x2.5 applied (counter-example)")
         void leastCommonValidZoneIsAccepted() {
             MvcTestResult result = mvc.post().uri("/api/shipping/calculate")
+                    .header("X-API-Key", "user-test-key")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content("""
                             { "weightKg": 1.000, "zone": "INTERNATIONAL", "orderTotal": 10.00 }
