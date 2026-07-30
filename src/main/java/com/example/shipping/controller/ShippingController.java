@@ -20,6 +20,7 @@ public class ShippingController {
     @PostMapping("/api/shipping/calculate")
     public ShippingCost calculate(@RequestBody ShippingRequest request) {
         BigDecimal baseRate = shippingCostService.baseRateFor(request.weightKg());
-        return new ShippingCost(baseRate, new ShippingCost.Breakdown(baseRate));
+        BigDecimal zonedRate = shippingCostService.zonedRateFor(baseRate, request.zone());
+        return new ShippingCost(zonedRate, new ShippingCost.Breakdown(baseRate, zonedRate));
     }
 }

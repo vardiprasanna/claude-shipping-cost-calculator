@@ -3,6 +3,7 @@ package com.example.shipping.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.example.shipping.model.DistanceZone;
 import java.math.BigDecimal;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -29,5 +30,17 @@ class ShippingCostServiceTest {
     void negativeWeightIsRejected() {
         assertThatThrownBy(() -> service.baseRateFor(new BigDecimal("-2.000")))
                 .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @ParameterizedTest(name = "The one where a ${0} base rate in the {1} zone has a ${2} zoned rate")
+    @CsvSource({
+            "8.99, DOMESTIC,      8.99",
+            "8.99, EUROPEAN,      13.49",
+            "8.99, INTERNATIONAL, 22.48",
+            "2.99, EUROPEAN,      4.49",
+    })
+    void appliesZoneMultiplierToBaseRate(String baseRate, DistanceZone zone, String expectedZonedRate) {
+        assertThat(service.zonedRateFor(new BigDecimal(baseRate), zone))
+                .isEqualByComparingTo(expectedZonedRate);
     }
 }

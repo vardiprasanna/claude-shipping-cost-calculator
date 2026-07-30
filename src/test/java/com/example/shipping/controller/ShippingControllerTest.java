@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
+import com.example.shipping.model.DistanceZone;
 import com.example.shipping.service.ShippingCostService;
 import java.math.BigDecimal;
 import org.assertj.core.api.InstanceOfAssertFactories;
@@ -15,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
+import org.springframework.test.web.servlet.assertj.MvcTestResult;
 
 @WebMvcTest(ShippingController.class)
 class ShippingControllerTest {
@@ -54,5 +56,58 @@ class ShippingControllerTest {
                         { "weightKg": -2.000, "zone": "DOMESTIC", "orderTotal": 10.00 }
                         """))
                 .hasStatus(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    @DisplayName("The one where an unrecognized zone value is mapped to 400 Bad Request")
+    void mapsUnrecognizedZoneToBadRequest() {
+        assertThat(mvc.post().uri("/api/shipping/calculate")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        { "weightKg": 1.000, "zone": "MARS", "orderTotal": 10.00 }
+                        """))
+                .hasStatus(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    @DisplayName("The one where the endpoint applies the zone multiplier and returns the zoned rate as JSON")
+    void returnsServiceZonedRateAsJson() {
+        given(shippingCostService.baseRateFor(any(BigDecimal.class))).willReturn(new BigDecimal("8.99"));
+        given(shippingCostService.zonedRateFor(any(BigDecimal.class), any(DistanceZone.class)))
+                .willReturn(new BigDecimal("13.49"));
+
+        MvcTestResult result = mvc.post().uri("/api/shipping/calculate")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        { "weightKg": 1.000, "zone": "EUROPEAN", "orderTotal": 10.00 }
+                        """)
+                .exchange();
+
+        assertThat(result).hasStatusOk();
+        assertThat(result).bodyJson()
+                .extractingPath("$.breakdown.zonedRate")
+                .convertTo(InstanceOfAssertFactories.BIG_DECIMAL)
+                .isEqualByComparingTo("13.49");
+    }
+
+    @Test
+    @DisplayName("The one where the endpoint's total cost tracks the zoned rate")
+    void totalCostTracksZonedRate() {
+        given(shippingCostService.baseRateFor(any(BigDecimal.class))).willReturn(new BigDecimal("8.99"));
+        given(shippingCostService.zonedRateFor(any(BigDecimal.class), any(DistanceZone.class)))
+                .willReturn(new BigDecimal("13.49"));
+
+        MvcTestResult result = mvc.post().uri("/api/shipping/calculate")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        { "weightKg": 1.000, "zone": "EUROPEAN", "orderTotal": 10.00 }
+                        """)
+                .exchange();
+
+        assertThat(result).hasStatusOk();
+        assertThat(result).bodyJson()
+                .extractingPath("$.totalCost")
+                .convertTo(InstanceOfAssertFactories.BIG_DECIMAL)
+                .isEqualByComparingTo("13.49");
     }
 }
