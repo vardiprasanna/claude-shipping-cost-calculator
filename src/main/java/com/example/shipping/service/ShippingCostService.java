@@ -1,5 +1,6 @@
 package com.example.shipping.service;
 
+import com.example.shipping.model.DistanceZone;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import org.springframework.stereotype.Service;
@@ -25,5 +26,9 @@ public class ShippingCostService {
                     .setScale(2, RoundingMode.HALF_UP);
         }
         return ONE_TO_TWENTY_KG_RATE;
+    }
+
+    public BigDecimal zonedRateFor(BigDecimal baseRate, DistanceZone zone) {
+        return baseRate.multiply(zone.multiplier()).setScale(2, RoundingMode.HALF_UP);
     }
 }
