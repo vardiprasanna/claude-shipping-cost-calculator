@@ -91,16 +91,18 @@ class ShippingControllerTest {
     }
 
     @Test
-    @DisplayName("The one where the endpoint's total cost tracks the zoned rate")
-    void totalCostTracksZonedRate() {
+    @DisplayName("The one where the controller returns the service's totalCost as JSON")
+    void returnsServiceTotalCostAsJson() {
         given(shippingCostService.baseRateFor(any(BigDecimal.class))).willReturn(new BigDecimal("8.99"));
         given(shippingCostService.zonedRateFor(any(BigDecimal.class), any(DistanceZone.class)))
                 .willReturn(new BigDecimal("13.49"));
+        given(shippingCostService.totalCostFor(any(BigDecimal.class), any(DistanceZone.class), any(BigDecimal.class)))
+                .willReturn(new BigDecimal("0.00"));
 
         MvcTestResult result = mvc.post().uri("/api/shipping/calculate")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
-                        { "weightKg": 1.000, "zone": "EUROPEAN", "orderTotal": 10.00 }
+                        { "weightKg": 1.000, "zone": "DOMESTIC", "orderTotal": 100.00 }
                         """)
                 .exchange();
 
@@ -108,6 +110,31 @@ class ShippingControllerTest {
         assertThat(result).bodyJson()
                 .extractingPath("$.totalCost")
                 .convertTo(InstanceOfAssertFactories.BIG_DECIMAL)
-                .isEqualByComparingTo("13.49");
+                .isEqualByComparingTo("0.00");
+    }
+
+    @Test
+    @DisplayName("The one where the endpoint reports freeShippingApplied as true in the breakdown")
+    void reportsFreeShippingAppliedInBreakdown() {
+        given(shippingCostService.baseRateFor(any(BigDecimal.class))).willReturn(new BigDecimal("8.99"));
+        given(shippingCostService.zonedRateFor(any(BigDecimal.class), any(DistanceZone.class)))
+                .willReturn(new BigDecimal("8.99"));
+        given(shippingCostService.totalCostFor(any(BigDecimal.class), any(DistanceZone.class), any(BigDecimal.class)))
+                .willReturn(new BigDecimal("0.00"));
+        given(shippingCostService.qualifiesForFreeShipping(any(DistanceZone.class), any(BigDecimal.class)))
+                .willReturn(true);
+
+        MvcTestResult result = mvc.post().uri("/api/shipping/calculate")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        { "weightKg": 1.000, "zone": "DOMESTIC", "orderTotal": 100.00 }
+                        """)
+                .exchange();
+
+        assertThat(result).hasStatusOk();
+        assertThat(result).bodyJson()
+                .extractingPath("$.breakdown.freeShippingApplied")
+                .asBoolean()
+                .isTrue();
     }
 }
